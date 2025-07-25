@@ -229,7 +229,7 @@ const UserPermissionsModal: React.FC<UserPermissionsModalProps> = ({
           onClick={handleSubmit}
           disabled={!selectedRole || isSubmitting}
           className={`
-            px-6 py-2 rounded-lg font-medium transition-all duration-300 flex items-center space-x-2 transform hover:scale-105
+            px-6 py-2 rounded-lg font-medium transition-all duration-300 flex items-center space-x-2 transform hover:scale-105 cursor-pointer
             ${selectedRole && !isSubmitting
               ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-sm hover:shadow-lg'
               : 'bg-gray-300 text-gray-500 cursor-not-allowed'

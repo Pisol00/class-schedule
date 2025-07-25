@@ -414,7 +414,7 @@ const Header: React.FC<{ isEditMode: boolean; onToggleEditMode: () => void; isLo
         <button
           onClick={onToggleEditMode}
           disabled={isLoading}
-          className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+          className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-all duration-200 cursor-pointer ${
             isEditMode
               ? 'bg-gray-600 hover:bg-gray-700 text-white shadow-md hover:shadow-lg'
               : 'bg-orange-600 hover:bg-orange-700 text-white shadow-md hover:shadow-lg'
@@ -808,7 +808,7 @@ const UserListHeader: React.FC<UserListHeaderProps> = ({
             <button 
               onClick={onOpenBulkModal}
               disabled={isLoading}
-              className={`${baseButtonClass} bg-indigo-600 hover:bg-indigo-700 text-white border border-indigo-600`}
+              className={`${baseButtonClass} bg-indigo-600 hover:bg-indigo-700 text-white border border-indigo-600 cursor-pointer`}
             >
               <Settings size={16} />
               <span>มอบสิทธิ์ {selectedUsers.length} คน</span>
@@ -816,7 +816,7 @@ const UserListHeader: React.FC<UserListHeaderProps> = ({
             <button 
               onClick={onBulkBlock}
               disabled={isLoading}
-              className={`${baseButtonClass} bg-red-600 hover:bg-red-700 text-white border border-red-600`}
+              className={`${baseButtonClass} bg-red-600 hover:bg-red-700 text-white border border-red-600 cursor-pointer`}
             >
               {isLoading ? (
                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
@@ -911,14 +911,14 @@ const UserListHeader: React.FC<UserListHeaderProps> = ({
                 {!isSelectAllPages && selectedUsers.length < filteredUsersCount && (
                   <button 
                     onClick={onSelectAllPages}
-                    className="text-xs text-indigo-600 hover:text-indigo-800 font-medium flex items-center space-x-1 transition-colors"
+                    className="text-xs text-indigo-600 hover:text-indigo-800 font-medium flex items-center space-x-1 transition-colors cursor-pointer"
                   >
                     <span>เลือกทั้งหมดทุกหน้า ({filteredUsersCount} คน)</span>
                   </button>
                 )}
                 <button 
                   onClick={onClearSelection}
-                  className="text-xs text-slate-500 hover:text-slate-700 font-medium flex items-center space-x-1 transition-colors"
+                  className="text-xs text-slate-500 hover:text-slate-700 font-medium flex items-center space-x-1 transition-colors cursor-pointer"
                 >
                   <X size={12} />
                   <span>ยกเลิกทั้งหมด</span>
