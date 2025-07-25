@@ -284,16 +284,16 @@ export default function LoginPage() {
             
             {/* Logo */}
             <motion.div 
-              className="flex justify-center mb-8"
+              className="flex justify-center "
               initial={{ opacity: 0, scale: 0 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.2, type: "spring", stiffness: 300, damping: 25 }}
             >
               <img 
-                src="https://jlearn.it.kmitl.ac.th/_next/image/?url=%2Fit-kmitl.png&w=256&q=75" 
+                src="/logo.png" 
                 alt="สถาบันเทคโนโลยีพระจอมเกล้าเจ้าคุณทหารลาดกระบัง" 
-                width={80}
-                height={80}
+                width={120}
+                height={120}
                 className="object-contain"
               />
             </motion.div>
@@ -369,7 +369,7 @@ export default function LoginPage() {
                 <div className="flex items-center justify-center space-x-3 text-slate-400 text-sm">
                   <span>© 2025</span>
                   <div className="w-1 h-1 bg-slate-400 rounded-full" />
-                  <span>All Rights Reserved</span>
+                  <span>สงวนลิขสิทธิ์</span>
                 </div>
               </div>
             </motion.div>
@@ -410,12 +410,6 @@ export default function LoginPage() {
         <div className="space-y-4 text-sm text-gray-600 leading-relaxed">
           <p>
             เราใช้ข้อมูลของคุณเพื่อการจัดตารางการสอนและการจัดการระบบเท่านั้น
-          </p>
-          <p>
-            ข้อมูลของคุณจะได้รับการปกป้องตามมาตรฐานความปลอดภัยของมหาวิทยาลัย
-          </p>
-          <p>
-            เราไม่เปิดเผยข้อมูลส่วนบุคคลให้กับบุคคลที่สาม
           </p>
         </div>
       </Modal>
