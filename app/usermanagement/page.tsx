@@ -1,7 +1,9 @@
 "use client"
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
-import { Users, Shield, User, Calendar, Settings, Search, X, FileText, Info, AlertCircle, CheckCircle, XCircle, Edit3, Eye } from 'lucide-react';
+import { Users, Shield, User, Calendar, Settings, Search, X, FileText, Info, AlertCircle, CheckCircle, XCircle, Edit3, Eye, Database, Clock, UserCheck, Cog, BarChart3, Users2, Globe } from 'lucide-react';
 import UserPermissionsContainer from '@/components/modal/UserPermissionsContainer';
+import Navbar from '@/components/layout/Header'
+import Footer from '@/components/layout/Footer';
 
 // ============== Types ==============
 interface User {
@@ -22,9 +24,20 @@ interface TabConfig {
 
 interface RoleConfig {
   role: string;
-  icon: string;
+  icon: React.ComponentType<{ size?: number; className?: string }>;
   color: string;
   permissions: string[];
+}
+
+interface RolePermission {
+  id: string;
+  label: string;
+  description: string;
+  category: 'data' | 'schedule' | 'user' | 'system';
+}
+
+interface RolePermissions {
+  [roleId: string]: string[];
 }
 
 interface Toast {
@@ -58,11 +71,41 @@ const SURNAMES = ['ใจดี', 'รักดี', 'มั่นคง', 'ส�
 const DEPARTMENTS = ['hr', 'it', 'marketing', 'sales', 'accounting'];
 
 const ROLE_CONFIGS: RoleConfig[] = [
-  { role: 'ผู้ใช้งานทั่วไป', icon: '👤', color: 'blue', permissions: ['อ่าน', 'ความเห็น'] },
-  { role: 'ผู้รับผิดชอบฯ', icon: '📅', color: 'green', permissions: ['อ่าน', 'เขียน', 'จัดตาราง'] },
-  { role: 'ผู้ดูแลระบบ', icon: '⚙️', color: 'purple', permissions: ['อ่าน', 'เขียน', 'ลบ', 'จัดการผู้ใช้'] },
-  { role: 'บล็อกชั่วคราว', icon: '🚫', color: 'red', permissions: ['ไม่มีสิทธิ์'] }
+  { role: 'ผู้ใช้งานทั่วไป', icon: User, color: 'blue', permissions: ['อ่าน', 'ความเห็น'] },
+  { role: 'ผู้รับผิดชอบจัดตาราง', icon: Calendar, color: 'green', permissions: ['อ่าน', 'เขียน', 'จัดตาราง'] },
+  { role: 'ผู้ดูแลระบบ', icon: Settings, color: 'purple', permissions: ['อ่าน', 'เขียน', 'ลบ', 'จัดการผู้ใช้'] },
+  { role: 'บล็อกชั่วคราว', icon: XCircle, color: 'red', permissions: ['ไม่มีสิทธิ์'] }
 ];
+
+// Available permissions that can be assigned to roles
+const AVAILABLE_PERMISSIONS: RolePermission[] = [
+  // Data permissions
+  { id: 'read_data', label: 'อ่านข้อมูล', description: 'สามารถดูข้อมูลในระบบได้', category: 'data' },
+  { id: 'write_data', label: 'เขียน/แก้ไขข้อมูล', description: 'สามารถสร้างและแก้ไขข้อมูลได้', category: 'data' },
+  { id: 'delete_data', label: 'ลบข้อมูล', description: 'สามารถลบข้อมูลในระบบได้', category: 'data' },
+  { id: 'export_data', label: 'ส่งออกข้อมูล', description: 'สามารถส่งออกข้อมูลเป็นไฟล์ได้', category: 'data' },
+  
+  // Schedule permissions
+  { id: 'view_schedule', label: 'ดูตารางเรียน', description: 'สามารถดูตารางเรียนได้', category: 'schedule' },
+  { id: 'manage_schedule', label: 'จัดการตารางเรียน', description: 'สามารถสร้างและแก้ไขตารางเรียนได้', category: 'schedule' },
+  
+  // User permissions
+  { id: 'view_users', label: 'ดูข้อมูลผู้ใช้', description: 'สามารถดูรายชื่อผู้ใช้งานได้', category: 'user' },
+  { id: 'manage_users', label: 'จัดการผู้ใช้งาน', description: 'สามารถเพิ่ม แก้ไข ลบผู้ใช้งานได้', category: 'user' },
+  { id: 'manage_permissions', label: 'จัดการสิทธิ์ผู้ใช้', description: 'สามารถกำหนดสิทธิ์ให้ผู้ใช้งานได้', category: 'user' },
+  
+  // System permissions
+  { id: 'view_reports', label: 'ดูรายงาน', description: 'สามารถดูรายงานของระบบได้', category: 'system' },
+  { id: 'manage_system', label: 'จัดการระบบ', description: 'สามารถตั้งค่าระบบได้', category: 'system' },
+  { id: 'view_logs', label: 'ดู System Logs', description: 'สามารถดู log การใช้งานระบบได้', category: 'system' }
+];
+
+// Default permissions for each role
+const DEFAULT_ROLE_PERMISSIONS: RolePermissions = {
+  teacher: ['read_data', 'view_schedule', 'view_users'],
+  staff: ['read_data', 'write_data', 'view_schedule', 'manage_schedule', 'view_users'],
+  admin: ['read_data', 'write_data', 'delete_data', 'export_data', 'view_schedule', 'manage_schedule','view_users', 'manage_users', 'manage_permissions']
+};
 
 // Roles for modal
 const MODAL_ROLES = [
@@ -544,7 +587,7 @@ const SectionTabBar: React.FC<SectionTabBarProps> = ({
   const tabs: TabConfig[] = [
     { id: 'pending', label: 'รอกำหนดสิทธิ์', count: allUsersData.pending.length, color: 'yellow' },
     { id: 'general', label: 'ผู้ใช้งานทั่วไป', count: allUsersData.general.length, color: 'blue' },
-    { id: 'schedule', label: 'ผู้รับผิดชอบฯ', count: allUsersData.schedule.length, color: 'green' },
+    { id: 'schedule', label: 'ผู้รับผิดชอบจัดตาราง', count: allUsersData.schedule.length, color: 'green' },
     { id: 'admin', label: 'ผู้ดูแลระบบ', count: allUsersData.admin.length, color: 'purple' },
     { id: 'blocked', label: 'บล็อกชั่วคราว', count: allUsersData.blocked.length, color: 'red' }
   ];
@@ -712,7 +755,7 @@ const Pagination: React.FC<PaginationProps> = ({
       <button
         onClick={() => onPageChange(Math.max(1, currentPage - 1))}
         disabled={currentPage === 1}
-        className="px-3 py-1 text-sm border rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+        className="px-3 py-1 text-sm text-gray-400 border rounded hover:bg-gray-50 disabled:cursor-not-allowed cursor-pointer"
       >
         ก่อนหน้า
       </button>
@@ -724,7 +767,7 @@ const Pagination: React.FC<PaginationProps> = ({
           className={`px-3 py-1 text-sm border rounded cursor-pointer ${
             currentPage === page 
               ? 'bg-blue-600 text-white' 
-              : 'hover:bg-gray-50'
+              : 'text-gray-400 hover:bg-gray-50'
           }`}
         >
           {page}
@@ -734,7 +777,7 @@ const Pagination: React.FC<PaginationProps> = ({
       <button
         onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
         disabled={currentPage === totalPages}
-        className="px-3 py-1 text-sm border rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+        className="px-3 py-1 text-gray-400 text-sm border rounded hover:bg-gray-50 disabled:cursor-not-allowed cursor-pointer"
       >
         ถัดไป
       </button>
@@ -970,59 +1013,300 @@ const EmptyState: React.FC<{ searchTerm: string }> = ({ searchTerm }) => (
   </div>
 );
 
-const RoleManagementTab: React.FC<{ isEditMode: boolean }> = ({ isEditMode }) => (
-  <div className="bg-white rounded-lg shadow">
-    <div className="p-6">
-      <div className="text-center py-12">
-        <div className="text-6xl mb-4">🔐</div>
-        <h3 className="text-lg font-medium text-gray-900 mb-2">
-          กำหนดสิทธิ์ให้แต่ละบทบาท
-        </h3>
-        <p className="text-gray-500 mb-6">
-          จัดการสิทธิ์การเข้าถึงแต่ละฟีเจอร์สำหรับแต่ละบทบาท
-          {!isEditMode && <span className="block text-sm mt-2 text-orange-600">เปิดโหมดแก้ไขเพื่อจัดการสิทธิ์</span>}
-        </p>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 max-w-4xl mx-auto">
-          {ROLE_CONFIGS.map((item, index) => (
-            <div key={index} className={`bg-gray-50 p-4 rounded-lg border transition-shadow ${
-              isEditMode ? 'cursor-pointer hover:shadow-md' : 'cursor-not-allowed'
-            }`}>
-              <div className="text-2xl mb-2">{item.icon}</div>
-              <h4 className="font-medium text-gray-900 mb-2 flex items-center justify-center">
-                {item.role}
-              </h4>
-              <div className="space-y-1">
-                {item.permissions.map((permission, i) => (
-                  <div key={i} className={`text-xs px-2 py-1 rounded ${
-                    item.color === 'blue' ? 'bg-blue-100 text-blue-800' :
-                    item.color === 'green' ? 'bg-green-100 text-green-800' :
-                    item.color === 'purple' ? 'bg-purple-100 text-purple-800' :
-                    'bg-red-100 text-red-800'
-                  }`}>
-                    {permission}
-                  </div>
-                ))}
-              </div>
-              {isEditMode && (
-                <button 
-                  className={`mt-3 w-full px-3 py-1 text-xs text-white rounded hover:opacity-90 cursor-pointer ${
-                    item.color === 'blue' ? 'bg-blue-600' :
-                    item.color === 'green' ? 'bg-green-600' :
-                    item.color === 'purple' ? 'bg-purple-600' :
-                    'bg-red-600'
-                  }`}
-                >
-                  แก้ไขสิทธิ์
-                </button>
-              )}
+const RoleManagementTab: React.FC<{ isEditMode: boolean; addToast: (toast: Omit<Toast, 'id'>) => void }> = ({ isEditMode, addToast }) => {
+  const [rolePermissions, setRolePermissions] = useState<RolePermissions>(DEFAULT_ROLE_PERMISSIONS);
+  const [hasChanges, setHasChanges] = useState(false);
+
+  const togglePermission = useCallback((roleId: string, permissionId: string) => {
+    if (!isEditMode) return;
+
+    setRolePermissions(prev => {
+      const currentPermissions = prev[roleId] || [];
+      const newPermissions = currentPermissions.includes(permissionId)
+        ? currentPermissions.filter(p => p !== permissionId)
+        : [...currentPermissions, permissionId];
+      
+      const updated = { ...prev, [roleId]: newPermissions };
+      setHasChanges(JSON.stringify(updated) !== JSON.stringify(DEFAULT_ROLE_PERMISSIONS));
+      return updated;
+    });
+  }, [isEditMode]);
+
+  const toggleAllPermissions = useCallback((roleId: string) => {
+    if (!isEditMode) return;
+
+    setRolePermissions(prev => {
+      const currentPermissions = prev[roleId] || [];
+      const allPermissionIds = AVAILABLE_PERMISSIONS.map(p => p.id);
+      const hasAllPermissions = allPermissionIds.every(id => currentPermissions.includes(id));
+      
+      const newPermissions = hasAllPermissions ? [] : allPermissionIds;
+      const updated = { ...prev, [roleId]: newPermissions };
+      setHasChanges(JSON.stringify(updated) !== JSON.stringify(DEFAULT_ROLE_PERMISSIONS));
+      return updated;
+    });
+  }, [isEditMode]);
+
+  const toggleCategoryPermissions = useCallback((roleId: string, category: string) => {
+    if (!isEditMode) return;
+
+    setRolePermissions(prev => {
+      const currentPermissions = prev[roleId] || [];
+      const categoryPermissions = getPermissionsByCategory(category);
+      const categoryPermissionIds = categoryPermissions.map(p => p.id);
+      const hasAllCategoryPermissions = categoryPermissionIds.every(id => currentPermissions.includes(id));
+      
+      let newPermissions;
+      if (hasAllCategoryPermissions) {
+        // Remove all category permissions
+        newPermissions = currentPermissions.filter(id => !categoryPermissionIds.includes(id));
+      } else {
+        // Add all category permissions
+        newPermissions = [...new Set([...currentPermissions, ...categoryPermissionIds])];
+      }
+      
+      const updated = { ...prev, [roleId]: newPermissions };
+      setHasChanges(JSON.stringify(updated) !== JSON.stringify(DEFAULT_ROLE_PERMISSIONS));
+      return updated;
+    });
+  }, [isEditMode]);
+
+  const saveChanges = useCallback(async () => {
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      console.log('Saving role permissions:', rolePermissions);
+      addToast({
+        type: 'success',
+        title: 'บันทึกสิทธิ์สำเร็จ!',
+        message: 'การกำหนดสิทธิ์บทบาทได้รับการอัพเดทแล้ว'
+      });
+      setHasChanges(false);
+    } catch (error) {
+      addToast({
+        type: 'error',
+        title: 'เกิดข้อผิดพลาด',
+        message: 'ไม่สามารถบันทึกการเปลี่ยนแปลงได้'
+      });
+    }
+  }, [rolePermissions, addToast]);
+
+  const resetChanges = useCallback(() => {
+    setRolePermissions(DEFAULT_ROLE_PERMISSIONS);
+    setHasChanges(false);
+  }, []);
+
+  const getPermissionsByCategory = (category: string) => {
+    return AVAILABLE_PERMISSIONS.filter(p => p.category === category);
+  };
+
+  const getCategoryLabel = (category: string) => {
+    const labels = {
+      data: 'การจัดการข้อมูล',
+      schedule: 'การจัดการตารางเรียน',
+      user: 'การจัดการผู้ใช้งาน',
+      system: 'การจัดการระบบ'
+    };
+    return labels[category as keyof typeof labels] || category;
+  };
+
+  const getCategoryIcon = (category: string) => {
+    const icons = {
+      data: BarChart3,
+      schedule: Calendar,
+      user: Users2,
+      system: Cog
+    };
+    return icons[category as keyof typeof icons] || FileText;
+  };
+
+  const roles = [
+    { id: 'teacher', title: 'ผู้ใช้งานทั่วไป', icon: User, color: 'blue' },
+    { id: 'staff', title: 'ผู้รับผิดชอบจัดตารางสอน', icon: Calendar, color: 'green' },
+    { id: 'admin', title: 'ผู้ดูแลระบบ', icon: Settings, color: 'purple' }
+  ];
+
+  return (
+    <div className="bg-white rounded-lg shadow">
+      <div className="p-6">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">กำหนดสิทธิ์ให้แต่ละบทบาท</h2>
+            <p className="text-gray-600">จัดการสิทธิ์การเข้าถึงแต่ละฟีเจอร์สำหรับแต่ละบทบาท</p>
+          </div>
+          
+          
+          {hasChanges && isEditMode && (
+            <div className="flex space-x-3">
+              <button
+                onClick={resetChanges}
+                className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors flex items-center space-x-2"
+              >
+                <X size={16} />
+                <span>ยกเลิก</span>
+              </button>
+              <button
+                onClick={saveChanges}
+                className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors flex items-center space-x-2"
+              >
+                <CheckCircle size={16} />
+                <span>บันทึกการเปลี่ยนแปลง</span>
+              </button>
             </div>
-          ))}
+          )}
         </div>
+
+        {hasChanges && isEditMode && (
+          <div className="mb-4 p-4 bg-orange-50 border border-orange-200 rounded-lg">
+            <div className="flex items-center space-x-2 text-orange-800">
+              <AlertCircle className="w-5 h-5 flex-shrink-0" />
+              <div className="text-sm">
+                <strong>มีการเปลี่ยนแปลง:</strong> คุณได้ทำการเปลี่ยนแปลงสิทธิ์ อย่าลืมกดปุ่ม "บันทึกการเปลี่ยนแปลง" เพื่อยืนยัน
+              </div>
+            </div>
+          </div>
+        )}
+
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {roles.map((role) => {
+            const roleColor = role.color === 'blue' ? 'blue' : role.color === 'green' ? 'green' : 'purple';
+            const colorClasses = {
+              blue: { bg: 'bg-blue-50', border: 'border-blue-200', text: 'text-blue-800', button: 'bg-blue-600 hover:bg-blue-700' },
+              green: { bg: 'bg-green-50', border: 'border-green-200', text: 'text-green-800', button: 'bg-green-600 hover:bg-green-700' },
+              purple: { bg: 'bg-purple-50', border: 'border-purple-200', text: 'text-purple-800', button: 'bg-purple-600 hover:bg-purple-700' }
+            };
+            const colors = colorClasses[roleColor];
+
+            return (
+              <div key={role.id} className={`${colors.bg} ${colors.border} border rounded-lg p-4`}>
+                <div className="text-center mb-4">
+                  <div className="flex justify-center mb-2">
+                    <role.icon size={32} className={colors.text} />
+                  </div>
+                  <h3 className={`font-semibold ${colors.text} text-lg`}>{role.title}</h3>
+                  <p className="text-sm text-gray-600 mt-1">
+                    {(rolePermissions[role.id] || []).length} สิทธิ์ที่ได้รับ
+                  </p>
+                </div>
+
+                {/* Select All Section */}
+                {isEditMode && (
+                  <div className="bg-white rounded-lg p-3 mb-4 border-2 border-dashed border-gray-200">
+                    <label className="flex items-center space-x-3 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={AVAILABLE_PERMISSIONS.every(p => (rolePermissions[role.id] || []).includes(p.id))}
+                        ref={(el) => {
+                          if (el) {
+                            const currentPermissions = rolePermissions[role.id] || [];
+                            const hasAllPermissions = AVAILABLE_PERMISSIONS.every(p => currentPermissions.includes(p.id));
+                            const hasSomePermissions = AVAILABLE_PERMISSIONS.some(p => currentPermissions.includes(p.id));
+                            el.indeterminate = hasSomePermissions && !hasAllPermissions;
+                          }
+                        }}
+                        onChange={() => toggleAllPermissions(role.id)}
+                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded cursor-pointer"
+                      />
+                      <div className="flex-1">
+                        <div className="text-sm font-semibold text-gray-900 flex items-center space-x-2">
+                          <span>เลือกทั้งหมด</span>
+                          <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+                            {AVAILABLE_PERMISSIONS.length} สิทธิ์
+                          </span>
+                        </div>
+                        <div className="text-xs text-gray-500 mt-1">
+                          เลือกหรือยกเลิกสิทธิ์ทั้งหมดในบทบาทนี้
+                        </div>
+                      </div>
+                    </label>
+                  </div>
+                )}
+
+                <div className="space-y-4">
+                  {['data', 'schedule', 'user'].map(category => {
+                    const categoryPermissions = getPermissionsByCategory(category);
+                    const hasPermissionsInCategory = categoryPermissions.some(p => 
+                      (rolePermissions[role.id] || []).includes(p.id)
+                    );
+
+                    return (
+                      <div key={category} className="bg-white rounded-lg p-3">
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center space-x-2">
+                            {React.createElement(getCategoryIcon(category), { size: 18, className: "text-gray-600" })}
+                            <h4 className="font-medium text-gray-900 text-sm">{getCategoryLabel(category)}</h4>
+                            {hasPermissionsInCategory && (
+                              <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
+                                {categoryPermissions.filter(p => (rolePermissions[role.id] || []).includes(p.id)).length}
+                              </span>
+                            )}
+                          </div>
+                          
+                          {/* Category Select All */}
+                          {isEditMode && (
+                            <label className="flex items-center space-x-2 cursor-pointer">
+                              <input
+                                type="checkbox"
+                                checked={categoryPermissions.every(p => (rolePermissions[role.id] || []).includes(p.id))}
+                                ref={(el) => {
+                                  if (el) {
+                                    const currentPermissions = rolePermissions[role.id] || [];
+                                    const hasAllCategoryPermissions = categoryPermissions.every(p => currentPermissions.includes(p.id));
+                                    const hasSomeCategoryPermissions = categoryPermissions.some(p => currentPermissions.includes(p.id));
+                                    el.indeterminate = hasSomeCategoryPermissions && !hasAllCategoryPermissions;
+                                  }
+                                }}
+                                onChange={() => toggleCategoryPermissions(role.id, category)}
+                                className="h-3 w-3 text-blue-600 focus:ring-blue-500 border-gray-300 rounded cursor-pointer"
+                              />
+                              <span className="text-xs text-gray-600 font-medium">ทั้งหมด</span>
+                            </label>
+                          )}
+                        </div>
+                        
+                        <div className="space-y-2">
+                          {categoryPermissions.map(permission => {
+                            const isChecked = (rolePermissions[role.id] || []).includes(permission.id);
+                            return (
+                              <label 
+                                key={permission.id} 
+                                className={`flex items-start space-x-3 p-2 rounded cursor-pointer transition-colors ${
+                                  isEditMode ? 'hover:bg-gray-50' : 'cursor-default'
+                                } ${isChecked ? 'bg-blue-50' : ''}`}
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={isChecked}
+                                  onChange={() => togglePermission(role.id, permission.id)}
+                                  disabled={!isEditMode}
+                                  className={`mt-0.5 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded ${
+                                    isEditMode ? 'cursor-pointer' : 'cursor-default'
+                                  }`}
+                                />
+                                <div className="flex-1 min-w-0">
+                                  <div className="text-sm font-medium text-gray-900">{permission.label}</div>
+                                  <div className="text-xs text-gray-500 mt-1">{permission.description}</div>
+                                </div>
+                              </label>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 // ============== Main Component ==============
 const UserPermissionDashboard: React.FC = () => {
@@ -1435,7 +1719,7 @@ const UserPermissionDashboard: React.FC = () => {
           </>
         )}
 
-        {activeMainTab === 'roles' && <RoleManagementTab isEditMode={isEditMode} />}
+        {activeMainTab === 'roles' && <RoleManagementTab isEditMode={isEditMode} addToast={addToast} />}
         
         {/* Toast Notifications */}
         <ToastContainer toasts={toasts} onRemove={removeToast} />
@@ -1527,8 +1811,18 @@ class ErrorBoundary extends React.Component<
 // ============== Main Component Wrapper ==============
 const DashboardWithErrorBoundary: React.FC = () => (
   <ErrorBoundary>
-    <UserPermissionDashboard />
+      {/* เพิ่ม Navbar ที่ด้านบน */}
+      <Navbar />
+      
+      {/* เนื้อหาหลัก */}
+      <main className="flex-1">
+        <UserPermissionDashboard />
+      </main>
+      
+      {/* เพิ่ม Footer ที่ด้านล่าง */}
+      <Footer />
   </ErrorBoundary>
 );
+
 
 export default DashboardWithErrorBoundary;
