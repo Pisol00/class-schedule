@@ -10,7 +10,7 @@ import {
   GoogleLoginButton, 
   HelpModalContent, 
   PrivacyModalContent 
-} from '@/LoginPage';
+} from '@/components/LoginPage';
 
 // ประเภทข้อมูล
 import { LoginState } from '@/types/login';
@@ -91,7 +91,7 @@ export default function LoginPage() {
                 ยินดีต้อนรับ
               </h1>
               <p className="text-gray-600 leading-relaxed">
-                เข้าสู่ระบบเพื่อจัดตารางการสอน
+                เข้าสู่ระบบจัดตารางการสอน
               </p>
             </motion.div>
 
@@ -140,10 +140,10 @@ export default function LoginPage() {
 
               {/* ข้อมูลสถาบัน */}
               <div className="text-center space-y-3">
-                <p className="text-slate-600 font-medium leading-relaxed">
-                  สถาบันเทคโนโลยีพระจอมเกล้าเจ้าคุณทหารลาดกระบัง
+                <p className="text-slate-600 leading-relaxed text-sm">
+                  คณะเทคโนโลยีสารสนเทศ <br /> สถาบันเทคโนโลยีพระจอมเกล้าเจ้าคุณทหารลาดกระบัง
                 </p>
-                <div className="flex items-center justify-center space-x-3 text-slate-400 text-sm">
+                <div className="flex items-center justify-center space-x-2 text-slate-400 text-sm">
                   <span>© 2025</span>
                   <div className="w-1 h-1 bg-slate-400 rounded-full" />
                   <span>สงวนลิขสิทธิ์</span>

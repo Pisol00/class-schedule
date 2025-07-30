@@ -52,7 +52,7 @@ const Footer: React.FC = () => {
           <div className="flex flex-col md:flex-row md:items-center md:justify-center">
             {/* Copyright */}
             <div className="text-sm text-gray-600">
-              <p>© 2025 สถาบันเทคโนโลยีพระจอมเกล้าเจ้าคุณทหารลาดกระบัง - สงวนลิขสิทธิ์ทุกประการ</p>
+              <p>© 2025 คณะเทคโนโลยีสารสนเทศ สถาบันเทคโนโลยีพระจอมเกล้าเจ้าคุณทหารลาดกระบัง - สงวนลิขสิทธิ์ทุกประการ</p>
             </div>
           </div>
         </div>
