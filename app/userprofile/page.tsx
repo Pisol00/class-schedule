@@ -59,7 +59,7 @@ const InfoField: React.FC<InfoFieldProps> = ({ label, value, icon: Icon }) => (
     <label className="block text-sm font-medium text-gray-600">{label}</label>
     <div className="flex items-center px-5 py-4 border border-gray-200 rounded-xl bg-gray-50">
       <Icon className="w-5 h-5 text-gray-400 mr-4 flex-shrink-0" />
-      <span className="text-gray-700 text-base">{value}</span>
+      <span className="text-gray-700 text-sm">{value}</span>
     </div>
   </div>
 );
