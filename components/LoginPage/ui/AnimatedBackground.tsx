@@ -17,7 +17,7 @@ const AnimatedBackground = () => {
   return (
     <div className="fixed inset-0 overflow-hidden">
       {/* Base gradient background */}
-      <div className="absolute inset-0 bg-blue-50" />
+      <div className="absolute inset-0 bg-gray-50" />
       
       {/* Animated mesh gradient overlay */}
       <motion.div 

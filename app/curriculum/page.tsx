@@ -389,7 +389,7 @@ const Curriculum = () => {
         </div>
 
         {/* ประเภทหลักสูตร */}
-        <div className="border-t pt-3">
+        {/* <div className="border-t pt-3">
           <p className="text-sm font-medium text-gray-700 mb-2">ประเภทหลักสูตร:</p>
           <div className="space-y-1">
             {course.overview.courseType.map((type, index) => (
@@ -399,7 +399,7 @@ const Curriculum = () => {
               </p>
             ))}
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );
