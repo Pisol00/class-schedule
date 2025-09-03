@@ -1,20 +1,16 @@
-// page.tsx
 'use client';
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 
-// คอมโพเนนต์
-import {
-  Modal,
-  GoogleLoginButton,
-  HelpModalContent,
-  PrivacyModalContent,
-  AnimatedBackground
-} from '@/components/LoginPage';
+// Types
+import { LoginState } from '@/app/login/types/auth';
 
-// ประเภทข้อมูล
-import { LoginState } from '@/types/login';
+// Global UI Components
+import { Modal } from '@/app/login/components/ui';
+
+// Login Specific Components
+import { GoogleLoginButton, HelpModalContent, PrivacyModalContent } from '@/app/login/components';
 
 export default function LoginPage() {
   const [state, setState] = useState<LoginState>({
@@ -46,8 +42,8 @@ export default function LoginPage() {
 
   return (
     <>
-      {/* พื้นหลัง */}
-      <AnimatedBackground />
+      {/* พื้นหลังธรรมดา */}
+      <div className="fixed inset-0 bg-blue-50" />
 
       {/* เนื้อหาหลัก */}
       <div className="fixed inset-0 flex items-center justify-center overflow-y-auto">

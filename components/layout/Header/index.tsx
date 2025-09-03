@@ -2,11 +2,21 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { 
+  BookOpen, 
+  FileText, 
+  Users, 
+  Building, 
+  User, 
+  Settings,
+  LogOut,
+  LucideIcon
+} from 'lucide-react';
 
 // Types
 interface NavigationItem {
   name: string;
-  icon: string;
+  icon: LucideIcon;
   href: string;
 }
 
@@ -21,26 +31,33 @@ interface DropdownProps {
   children: React.ReactNode;
 }
 
+interface MenuItemType {
+  icon: LucideIcon;
+  label: string;
+  href: string;
+  className?: string;
+}
+
 // Constants
 const NAVIGATION_ITEMS: NavigationItem[] = [
   {
     name: 'หลักสูตร',
-    icon: 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253',
+    icon: BookOpen,
     href: '/curriculum'
   },
   {
     name: 'รายวิชา',
-    icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z',
+    icon: FileText,
     href: '/subjects'
   },
   {
     name: 'อาจารย์',
-    icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z',
+    icon: Users,
     href: '/instructors'
   },
   {
     name: 'ห้องเรียน',
-    icon: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4',
+    icon: Building,
     href: '/rooms'
   }
 ];
@@ -50,14 +67,19 @@ const CURRENT_USER: User = {
   role: 'เจ้าหน้าที่ฝ่ายวิชาการ'
 };
 
-const MENU_ITEMS = [
+const MENU_ITEMS: MenuItemType[] = [
   {
-    icon: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z',
+    icon: User,
     label: 'โปรไฟล์',
     href: '/userprofile'
   },
   {
-    icon: 'M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1',
+    icon: Settings,
+    label: 'จัดการผู้ใช้งาน',
+    href: '/usermanagement'
+  },
+  {
+    icon: LogOut,
     label: 'ออกจากระบบ',
     href: '/login',
     className: 'text-red-600 hover:bg-red-50'
@@ -93,17 +115,9 @@ const useKeyboardShortcuts = (onEscape: () => void) => {
 };
 
 // UI Components
-const Icon = ({ path, className = "w-4 h-4" }: { path: string; className?: string }) => (
-  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={path} />
-  </svg>
-);
-
 const UserAvatar = ({ size = "w-10 h-10" }: { size?: string }) => (
   <div className={`${size} bg-slate-200 rounded-full flex items-center justify-center relative`}>
-    <svg className="w-5 h-5 text-slate-600" fill="currentColor" viewBox="0 0 20 20">
-      <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-    </svg>
+    <User className="w-5 h-5 text-slate-600" />
     <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-400 border-2 border-white rounded-full" />
   </div>
 );
@@ -140,16 +154,20 @@ const Logo = () => (
   </Link>
 );
 
-const NavigationLink = ({ item }: { item: NavigationItem }) => (
-  <Link
-    href={item.href}
-    className="text-sm font-medium text-slate-600 hover:text-slate-900 px-4 py-2.5 rounded-lg transition-all duration-200 flex items-center space-x-2 relative group hover:bg-slate-50"
-  >
-    <Icon path={item.icon} className="w-4 h-4 transition-transform group-hover:scale-110" />
-    <span>{item.name}</span>
-    <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-blue-500 group-hover:w-3/4 transition-all duration-200" />
-  </Link>
-);
+const NavigationLink = ({ item }: { item: NavigationItem }) => {
+  const IconComponent = item.icon;
+  
+  return (
+    <Link
+      href={item.href}
+      className="text-sm font-medium text-slate-600 hover:text-slate-900 px-4 py-2.5 rounded-lg transition-all duration-200 flex items-center space-x-2 relative group hover:bg-slate-50"
+    >
+      <IconComponent className="w-4 h-4 transition-transform group-hover:scale-110" />
+      <span>{item.name}</span>
+      <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-blue-500 group-hover:w-3/4 transition-all duration-200" />
+    </Link>
+  );
+};
 
 const Navigation = () => (
   <nav className="flex items-center justify-center space-x-1">
@@ -167,12 +185,12 @@ const UserInfo = ({ user }: { user: User }) => (
 );
 
 const MenuItem = ({ 
-  icon, 
+  icon: IconComponent, 
   label, 
   onClick, 
   className = "" 
 }: { 
-  icon: string; 
+  icon: LucideIcon; 
   label: string; 
   onClick: () => void; 
   className?: string; 
@@ -181,7 +199,7 @@ const MenuItem = ({
     className={`flex items-center px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer w-full text-left ${className}`}
     onClick={onClick}
   >
-    <Icon path={icon} className="w-4 h-4 mr-3 text-slate-500" />
+    <IconComponent className="w-4 h-4 mr-3 text-slate-500" />
     {label}
   </button>
 );
@@ -237,9 +255,7 @@ const UserProfile = () => {
         className="w-10 h-10 bg-slate-200 rounded-full flex items-center justify-center hover:bg-slate-300 transition-colors relative cursor-pointer"
         onClick={toggleDropdown}
       >
-        <svg className="w-5 h-5 text-slate-600" fill="currentColor" viewBox="0 0 20 20">
-          <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-        </svg>
+        <User className="w-5 h-5 text-slate-600" />
         <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-400 border-2 border-white rounded-full" />
       </button>
 
