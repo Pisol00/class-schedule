@@ -6,7 +6,6 @@ import { motion } from 'framer-motion';
 // Types
 import { LoginState } from '@/app/login/components/types/auth';
 
-
 // Login Specific Components
 import { GoogleLoginButton, HelpModalContent, PrivacyModalContent, Modal } from '@/app/login/components';
 
