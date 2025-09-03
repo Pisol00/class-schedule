@@ -4,13 +4,11 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 
 // Types
-import { LoginState } from '@/app/login/types/auth';
+import { LoginState } from '@/app/login/components/types/auth';
 
-// Global UI Components
-import { Modal } from '@/app/login/components/ui';
 
 // Login Specific Components
-import { GoogleLoginButton, HelpModalContent, PrivacyModalContent } from '@/app/login/components';
+import { GoogleLoginButton, HelpModalContent, PrivacyModalContent, Modal } from '@/app/login/components';
 
 export default function LoginPage() {
   const [state, setState] = useState<LoginState>({

@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { LoadingDots } from '@/app/login/components/ui';
+import { LoadingDots } from '@/app/login/components';
 
 interface GoogleLoginButtonProps {
   onClick: () => void;
