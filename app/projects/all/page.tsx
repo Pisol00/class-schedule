@@ -3,8 +3,8 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ChevronLeft, Filter, SortAsc } from 'lucide-react';
-import Header from '@/components/layout/Header';
-import Footer from '@/components/layout/Footer';
+import Header from '@/components/Navigation';
+import Footer from '@/components/Footer';
 import Dropdown, { DropdownHeader, DropdownSection, DropdownItem } from '@/components/ui/Dropdown';
 
 // ใช้ interfaces เดียวกันกับหน้าหลัก

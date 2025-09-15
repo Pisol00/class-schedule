@@ -1,8 +1,8 @@
 'use client'
 import React, { useState, useMemo } from 'react';
 import { Search, Users, ChevronDown, ChevronLeft, ChevronRight, Plus, Download, Upload, BookOpen, Briefcase, Star, GraduationCap } from 'lucide-react';
-import Navbar from '@/components/layout/Header'
-import Footer from '@/components/layout/Footer';
+import Navbar from '@/components/Navigation'
+import Footer from '@/components/Footer';
 
 interface Branch {
   id: number;

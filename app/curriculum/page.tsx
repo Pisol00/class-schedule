@@ -1,8 +1,8 @@
 'use client'
 import React, { useState, useMemo } from 'react';
 import { Search, FileText, ChevronDown, ChevronLeft, ChevronRight, Plus, Download, Upload, BookOpen } from 'lucide-react';
-import Navbar from '@/components/layout/Header'
-import Footer from '@/components/layout/Footer';
+import Navbar from '@/components/Navigation'
+import Footer from '@/components/Footer';
 
 interface Course {
   id: number;

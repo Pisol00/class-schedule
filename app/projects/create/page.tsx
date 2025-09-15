@@ -22,8 +22,8 @@ import {
   Download,
   X
 } from 'lucide-react';
-import Header from '@/components/layout/Header';
-import Footer from '@/components/layout/Footer';
+import Header from '@/components/Navigation';
+import Footer from '@/components/Footer';
 
 interface ProjectTemplate {
   id: string;

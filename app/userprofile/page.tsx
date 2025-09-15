@@ -1,7 +1,7 @@
 import React from 'react';
 import { User, Mail, LucideIcon } from 'lucide-react';
-import Navbar from '@/components/layout/Header';
-import Footer from '@/components/layout/Footer';
+import Navbar from '@/components/Navigation';
+import Footer from '@/components/Footer';
 
 // User data interface
 interface UserData {
